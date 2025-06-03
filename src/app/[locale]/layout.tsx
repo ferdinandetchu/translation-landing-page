@@ -1,8 +1,8 @@
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import '../globals.css';
-import { Toaster } from "@/components/ui/toaster";
+import '../globals.css'; // Ensure global styles are imported here
+import { Toaster } from "@/components/ui/toaster"; // Toaster should be here
 import { i18n, type Locale } from '@/lib/i18n-config';
 import { getDictionary } from '@/lib/get-dictionary';
 
