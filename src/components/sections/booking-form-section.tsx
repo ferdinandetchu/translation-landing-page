@@ -22,10 +22,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { SectionWrapper } from '@/components/shared/section-wrapper';
 import { SERVICES_DATA } from '@/lib/constants';
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Send } from "lucide-react";
+import { CalendarIcon, Send, Loader2 } from "lucide-react"; // Added Loader2
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import React from "react";
+import React, { useState, useEffect } from "react"; // Added useState, useEffect
 
 const bookingFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -41,6 +41,13 @@ type BookingFormValues = z.infer<typeof bookingFormSchema>;
 export function BookingFormSection() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [minCalendarDate, setMinCalendarDate] = useState<Date | undefined>(undefined);
+
+  useEffect(() => {
+    // Calculate min date only on client-side after mount
+    // This ensures new Date() is client's current date, avoiding SSR mismatch
+    setMinCalendarDate(new Date(new Date().setHours(0, 0, 0, 0)));
+  }, []); // Empty dependency array ensures this runs once on mount
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -175,15 +182,19 @@ export function BookingFormSection() {
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0,0,0,0)) // Disable past dates
-                        }
-                        initialFocus
-                      />
+                      {minCalendarDate === undefined ? (
+                        <div className="p-3 flex items-center justify-center" style={{width: '288px', height: '333px'}}>
+                           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < minCalendarDate} // Use state variable
+                          initialFocus
+                        />
+                      )}
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
@@ -212,7 +223,7 @@ export function BookingFormSection() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" variant="accent" size="lg" disabled={isSubmitting}>
+            <Button type="submit" className="w-full" variant="accent" size="lg" disabled={isSubmitting || minCalendarDate === undefined}>
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" /> }
               Send Booking Request
             </Button>
