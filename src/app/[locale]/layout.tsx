@@ -1,6 +1,5 @@
 
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import '../globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { i18n, type Locale } from '@/lib/i18n-config';
@@ -44,7 +43,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
       </body>
