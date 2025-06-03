@@ -27,7 +27,7 @@ export function HeroSection({ dictionary }: { dictionary: LocaleDictionary }) {
         </div>
         <div className="relative aspect-square max-w-md mx-auto md:max-w-none">
           <Image
-            src="https://images.unsplash.com/photo-1552664730-d307ca884978?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcm9mZXNzaW9uYWwlMjBkaXZlcnNlJTIwdGVhbSUyMGluJTIwb2ZmaWNlfGVufDB8fHx8MTc0ODk2MzcwM3ww&ixlib=rb-4.1.0&q=80&w=1080"
+            src="https://images.unsplash.com/photo-1573165759995-5865a394a1aa?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt={dictionary.heroImageAlt}
             width={600}
             height={600}
