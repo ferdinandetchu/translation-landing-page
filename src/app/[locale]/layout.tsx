@@ -1,5 +1,6 @@
 
 import type { Metadata, Viewport } from 'next';
+import type { ReactNode } from 'react';
 import '../globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { i18n, type Locale } from '@/lib/i18n-config';
@@ -10,11 +11,11 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
   params: { locale: Locale };
 }): Promise<Metadata> {
-  const dictionary = await getDictionary(locale);
+  const dictionary = await getDictionary(params.locale);
   return {
     title: dictionary.metadataTitle,
     description: dictionary.metadataDescription,
@@ -28,13 +29,12 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
-  children,
-  params,
-}: Readonly<{
-  children: React.ReactNode;
+type LocaleLayoutProps = {
+  children: ReactNode;
   params: { locale: Locale };
-}>) {
+};
+
+export default function LocaleLayout({ children, params }: LocaleLayoutProps): JSX.Element {
   return (
     <html lang={params.locale} suppressHydrationWarning>
       <head>
