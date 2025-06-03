@@ -1,33 +1,33 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { SectionWrapper } from '@/components/shared/section-wrapper';
-import { TESTIMONIALS_DATA } from '@/lib/constants';
 import Image from 'next/image';
 import { Star } from 'lucide-react';
+import type { LocaleDictionary } from '@/dictionaries/types';
 
-export function TestimonialsSection() {
+export function TestimonialsSection({ dictionary }: { dictionary: LocaleDictionary }) {
   return (
     <SectionWrapper id="testimonials" className="bg-secondary/30">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl font-headline">
-          What Our <span className="text-primary">Clients Say</span>
+          {dictionary.testimonialsTitle} <span className="text-primary">{dictionary.testimonialsTitleAccent}</span>
         </h2>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Hear from satisfied clients who have experienced the quality and professionalism of HAPPY TRANSLATION SERVICES.
+          {dictionary.testimonialsSubtitle}
         </p>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {TESTIMONIALS_DATA.map((testimonial) => (
+        {dictionary.testimonialsData.map((testimonial) => (
           <Card key={testimonial.id} className="shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col p-6 bg-card">
             <CardContent className="flex flex-col flex-grow items-center text-center space-y-4">
               {testimonial.avatar && (
                 <Image
                   src={testimonial.avatar}
-                  alt={testimonial.name}
+                  alt={dictionary.testimonialAvatarAlt.replace('{name}', testimonial.name)}
                   width={80}
                   height={80}
                   className="rounded-full border-2 border-primary/50 shadow-md"
-                  data-ai-hint="person avatar"
+                  data-ai-hint={testimonial.aiHint || "person avatar"}
                 />
               )}
               <div className="flex text-accent">

@@ -1,16 +1,16 @@
 
 'use client';
 import Link from 'next/link';
-import { NAV_LINKS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, MessageSquareText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import React from 'react';
+import LocaleSwitcher from '@/components/common/locale-switcher';
+import type { LocaleDictionary } from '@/dictionaries/types';
 
-
-export function Header() {
+export function Header({ dictionary }: { dictionary: LocaleDictionary }) {
   const isMobile = useIsMobile();
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -25,7 +25,7 @@ export function Header() {
 
   const NavLinks = ({ className }: { className?: string }) => (
     <nav className={cn("flex items-center gap-4 lg:gap-6", className)}>
-      {NAV_LINKS.map((link) => (
+      {dictionary.navLinks.map((link) => (
         <Link
           key={link.href}
           href={link.href}
@@ -46,24 +46,27 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2 mr-4">
           <MessageSquareText className="h-7 w-7 text-primary" />
-          <span className="font-headline text-xl font-semibold tracking-tight">Hapi Translation</span>
+          <span className="font-headline text-xl font-semibold tracking-tight">{dictionary.hapiTranslation}</span>
         </Link>
 
-        {isMobile ? (
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-xs pt-12">
-              <NavLinks className="flex-col space-y-4 items-start" />
-            </SheetContent>
-          </Sheet>
-        ) : (
-          <NavLinks />
-        )}
+        <div className="flex items-center gap-2">
+          {isMobile ? (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">{dictionary.mobileMenuToggle}</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-full max-w-xs pt-12">
+                <NavLinks className="flex-col space-y-4 items-start" />
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <NavLinks />
+          )}
+          <LocaleSwitcher dictionary={dictionary} />
+        </div>
       </div>
     </header>
   );

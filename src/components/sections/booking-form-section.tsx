@@ -20,34 +20,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { SectionWrapper } from '@/components/shared/section-wrapper';
-import { SERVICES_DATA } from '@/lib/constants';
 import { cn } from "@/lib/utils";
-import { CalendarIcon, Send, Loader2 } from "lucide-react"; // Added Loader2
+import { CalendarIcon, Send, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import React, { useState, useEffect } from "react"; // Added useState, useEffect
+import React, { useState, useEffect } from "react";
+import type { LocaleDictionary } from '@/dictionaries/types';
 
-const bookingFormSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().optional(),
-  service: z.string({ required_error: "Please select a service." }),
-  preferredDate: z.date().optional(),
-  message: z.string().max(500, { message: "Message cannot exceed 500 characters." }).optional(),
-});
 
-type BookingFormValues = z.infer<typeof bookingFormSchema>;
+export function BookingFormSection({ dictionary }: { dictionary: LocaleDictionary }) {
+  
+  const bookingFormSchema = z.object({
+    name: z.string().min(2, { message: dictionary.bookingFormNameMinError }),
+    email: z.string().email({ message: dictionary.bookingFormEmailError }),
+    phone: z.string().optional(),
+    service: z.string({ required_error: dictionary.bookingFormServiceError }),
+    preferredDate: z.date().optional(),
+    message: z.string().max(500, { message: dictionary.bookingFormMessageMaxError }).optional(),
+  });
+  
+  type BookingFormValues = z.infer<typeof bookingFormSchema>;
 
-export function BookingFormSection() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [minCalendarDate, setMinCalendarDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    // Calculate min date only on client-side after mount
-    // This ensures new Date() is client's current date, avoiding SSR mismatch
     setMinCalendarDate(new Date(new Date().setHours(0, 0, 0, 0)));
-  }, []); // Empty dependency array ensures this runs once on mount
+  }, []);
 
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
@@ -63,12 +63,11 @@ export function BookingFormSection() {
 
   async function onSubmit(data: BookingFormValues) {
     setIsSubmitting(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     console.log("Booking Data:", data);
     toast({
-      title: "Booking Request Sent!",
-      description: "Thank you for your request. We will get back to you shortly.",
+      title: dictionary.bookingFormSuccessToastTitle,
+      description: dictionary.bookingFormSuccessToastDescription,
     });
     form.reset();
     setIsSubmitting(false);
@@ -78,10 +77,10 @@ export function BookingFormSection() {
     <SectionWrapper id="booking" className="bg-primary/5">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl font-headline">
-          Ready to Get <span className="text-accent">Started?</span>
+          {dictionary.bookingFormReady} <span className="text-accent">{dictionary.bookingFormStartedAccent}</span>
         </h2>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Fill out the form below to book a service or inquire about our offerings. We&apos;re excited to help you with your language needs!
+          {dictionary.bookingFormSubtitle}
         </p>
       </div>
 
@@ -94,9 +93,9 @@ export function BookingFormSection() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{dictionary.bookingFormFullNameLabel}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Hapi Kelly" {...field} />
+                      <Input placeholder={dictionary.bookingFormFullNamePlaceholder} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -107,9 +106,9 @@ export function BookingFormSection() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel>{dictionary.bookingFormEmailLabel}</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="hapi@example.com" {...field} />
+                      <Input type="email" placeholder={dictionary.bookingFormEmailPlaceholder} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -122,9 +121,9 @@ export function BookingFormSection() {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone Number (Optional)</FormLabel>
+                  <FormLabel>{dictionary.bookingFormPhoneLabel}</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="+1 (234) 567-890" {...field} />
+                    <Input type="tel" placeholder={dictionary.bookingFormPhonePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,15 +135,15 @@ export function BookingFormSection() {
               name="service"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Required</FormLabel>
+                  <FormLabel>{dictionary.bookingFormServiceLabel}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a service" />
+                        <SelectValue placeholder={dictionary.bookingFormServicePlaceholder} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {SERVICES_DATA.map((service) => (
+                      {dictionary.servicesData.map((service) => (
                         <SelectItem key={service.id} value={service.id}>
                           {service.title}
                         </SelectItem>
@@ -161,7 +160,7 @@ export function BookingFormSection() {
               name="preferredDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Preferred Date (Optional)</FormLabel>
+                  <FormLabel>{dictionary.bookingFormDateLabel}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -175,7 +174,7 @@ export function BookingFormSection() {
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
-                            <span>Pick a date</span>
+                            <span>{dictionary.bookingFormDatePlaceholder}</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -191,7 +190,7 @@ export function BookingFormSection() {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < minCalendarDate} // Use state variable
+                          disabled={(date) => date < minCalendarDate}
                           initialFocus
                         />
                       )}
@@ -207,17 +206,17 @@ export function BookingFormSection() {
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Additional Message (Optional)</FormLabel>
+                  <FormLabel>{dictionary.bookingFormMessageLabel}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Tell us more about your project or requirements..."
+                      placeholder={dictionary.bookingFormMessagePlaceholder}
                       className="resize-none"
                       rows={4}
                       {...field}
                     />
                   </FormControl>
                   <FormDescription>
-                    Max 500 characters.
+                    {dictionary.bookingFormMessageDescription}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -225,7 +224,7 @@ export function BookingFormSection() {
             />
             <Button type="submit" className="w-full" variant="accent" size="lg" disabled={isSubmitting || minCalendarDate === undefined}>
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" /> }
-              Send Booking Request
+              {isSubmitting ? dictionary.bookingFormSubmitting : dictionary.bookingFormSubmitButton}
             </Button>
           </form>
         </Form>

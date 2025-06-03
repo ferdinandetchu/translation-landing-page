@@ -13,21 +13,21 @@ import { useToast } from "@/hooks/use-toast";
 import { runFlow } from '@genkit-ai/next/client';
 import type { TranslateTextInput, TranslateTextOutput } from '@/ai/flows/tone-of-voice-translator';
 import { translateText as translateTextFlow } from '@/ai/flows/tone-of-voice-translator';
-import { TONES_OF_VOICE } from '@/lib/constants';
+import type { LocaleDictionary } from '@/dictionaries/types';
 
-export function AiSamplerSection() {
+export function AiSamplerSection({ dictionary }: { dictionary: LocaleDictionary }) {
   const [inputText, setInputText] = useState<string>('Hello, we are pleased to inform you about our new service offering.');
-  const [selectedTone, setSelectedTone] = useState<string>(TONES_OF_VOICE[0].value);
+  const [selectedToneValue, setSelectedToneValue] = useState<string>(dictionary.tonesOfVoice[0].value);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [apiResult, setApiResult] = useState<TranslateTextOutput | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleSubmit = async () => {
-    if (!inputText.trim() || !selectedTone) {
+    if (!inputText.trim() || !selectedToneValue) {
       toast({
-        title: "Input missing",
-        description: "Please provide text and select a tone.",
+        title: dictionary.aiSamplerInputMissingToastTitle,
+        description: dictionary.aiSamplerInputMissingToastDescription,
         variant: "destructive",
       });
       return;
@@ -38,25 +38,26 @@ export function AiSamplerSection() {
     setApiError(null);
 
     try {
-      const flowInput: TranslateTextInput = { text: inputText, tone: selectedTone };
+      const flowInput: TranslateTextInput = { text: inputText, tone: selectedToneValue };
       const result = await runFlow(translateTextFlow, flowInput);
       
       if (result) {
         setApiResult(result);
       } else {
-        setApiError('The AI could not process this request. Please try again.');
+        const errorMsg = dictionary.aiSamplerErrorToastDescription;
+        setApiError(errorMsg);
          toast({
-          title: "AI Error",
-          description: 'The AI could not process this request. Please try again.',
+          title: dictionary.aiSamplerErrorToastTitle,
+          description: errorMsg,
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('AI Sampler Error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
+      const errorMessage = error instanceof Error ? error.message : dictionary.aiSamplerErrorToastDescription;
       setApiError(errorMessage);
       toast({
-        title: "Error",
+        title: dictionary.aiSamplerGenericErrorToastTitle,
         description: errorMessage,
         variant: "destructive",
       });
@@ -64,29 +65,32 @@ export function AiSamplerSection() {
       setIsLoading(false);
     }
   };
+  
+  const selectedToneObject = dictionary.tonesOfVoice.find(t => t.value === selectedToneValue);
+  const selectedToneLabel = selectedToneObject ? selectedToneObject.label : selectedToneValue;
 
   return (
     <SectionWrapper id="ai-sampler" className="bg-background">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl font-headline">
-          Experience Our <span className="text-accent">AI Tone Sampler</span>
+          {dictionary.aiSamplerExperience} <span className="text-accent">{dictionary.aiSamplerTitleAccent}</span>
         </h2>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          See how our AI can adapt text to various tones. Enter your text, choose a tone, and witness the transformation!
+          {dictionary.aiSamplerSubtitle}
         </p>
       </div>
 
       <Card className="max-w-2xl mx-auto shadow-xl">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl">Tone of Voice Translator</CardTitle>
-          <CardDescription>Enter text and select a target tone to see a sample translation.</CardDescription>
+          <CardTitle className="font-headline text-2xl">{dictionary.aiSamplerCardTitle}</CardTitle>
+          <CardDescription>{dictionary.aiSamplerCardDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="source-text" className="block text-sm font-medium text-foreground">Source Text</label>
+            <label htmlFor="source-text" className="block text-sm font-medium text-foreground">{dictionary.aiSamplerSourceTextLabel}</label>
             <Textarea
               id="source-text"
-              placeholder="Enter your text here..."
+              placeholder={dictionary.aiSamplerSourceTextPlaceholder}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               rows={4}
@@ -95,13 +99,13 @@ export function AiSamplerSection() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="tone-select" className="block text-sm font-medium text-foreground">Select Tone</label>
-            <Select value={selectedTone} onValueChange={setSelectedTone}>
+            <label htmlFor="tone-select" className="block text-sm font-medium text-foreground">{dictionary.aiSamplerSelectToneLabel}</label>
+            <Select value={selectedToneValue} onValueChange={setSelectedToneValue}>
               <SelectTrigger id="tone-select" className="w-full focus:ring-accent focus:border-accent">
-                <SelectValue placeholder="Choose a tone" />
+                <SelectValue placeholder={dictionary.aiSamplerSelectTonePlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                {TONES_OF_VOICE.map((tone) => (
+                {dictionary.tonesOfVoice.map((tone) => (
                   <SelectItem key={tone.value} value={tone.value}>
                     {tone.label}
                   </SelectItem>
@@ -116,18 +120,18 @@ export function AiSamplerSection() {
             ) : (
               <Sparkles className="mr-2 h-4 w-4" />
             )}
-            Translate with AI
+            {dictionary.aiSamplerTranslateButton}
           </Button>
 
           {apiResult && (
             <div className="space-y-4 pt-4">
-              <h3 className="text-lg font-semibold font-headline text-primary">Translation Result:</h3>
+              <h3 className="text-lg font-semibold font-headline text-primary">{dictionary.aiSamplerResultTitle}</h3>
               {!apiResult.isApplicable && (
                 <Alert variant="destructive" className="bg-destructive/10 border-destructive/30 text-destructive">
                    <AlertTriangle className="h-4 w-4 !text-destructive" />
-                  <AlertTitle>Tone Not Applicable</AlertTitle>
+                  <AlertTitle>{dictionary.aiSamplerToneNotApplicableTitle}</AlertTitle>
                   <AlertDescription>
-                    The selected tone ({selectedTone}) might not be suitable for typical business communication.
+                    {dictionary.aiSamplerToneNotApplicableDescription.replace('{selectedToneLabel}', selectedToneLabel)}
                   </AlertDescription>
                 </Alert>
               )}
@@ -142,7 +146,7 @@ export function AiSamplerSection() {
           {apiError && (
              <Alert variant="destructive" className="mt-4">
                <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{dictionary.aiSamplerGenericErrorToastTitle}</AlertTitle>
               <AlertDescription>{apiError}</AlertDescription>
             </Alert>
           )}
